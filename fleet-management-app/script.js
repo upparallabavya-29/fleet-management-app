@@ -75,93 +75,67 @@
     renderVehicles(filtered);
   }
 
-  function renderVehicles(list) {
-    fleetCardsContainer.innerHTML = "";
+ function renderVehicles(list) {
+  fleetCardsContainer.innerHTML = "";
 
-    if (list.length === 0) {
-      const msg = document.createElement("p");
-      msg.textContent = "No vehicles added yet.";
-      msg.className = "empty-message";
-      fleetCardsContainer.appendChild(msg);
-      return;
-    }
+  if (list.length === 0) {
+    fleetCardsContainer.innerHTML = `<p class="empty-message">No vehicles added yet.</p>`;
+    return;
+  }
 
-    list.forEach((vehicle) => {
-      const card = document.createElement("div");
-      card.className = "card fleet-card";
-      card.dataset.id = vehicle.id;
+  list.forEach((vehicle) => {
+    const card = document.createElement("div");
+    card.className = "vehicle-card";
 
-      const infoDiv = document.createElement("div");
-      infoDiv.className = "card-info";
+    card.innerHTML = `
+      <img src="https://coding-platform.s3.amazonaws.com/dev/lms/tickets/5e80fcb6-3f8e-480c-945b-30a5359eb40e/JNmYjkVr3WOjsrbu.png" class="vehicle-img" />
 
-      infoDiv.innerHTML = `
+      <div class="vehicle-details">
         <p><strong>Reg No:</strong> ${vehicle.regNo}</p>
         <p><strong>Category:</strong> ${vehicle.category}</p>
         <p><strong>Driver:</strong> ${vehicle.driverName}</p>
-        <p><strong>Availability:</strong> ${getAvailabilityLabel(
-          vehicle.isAvailable
-        )}</p>
-      `;
+        <p><strong>Status:</strong> ${vehicle.isAvailable ? "Available" : "Unavailable"}</p>
+      </div>
 
-      const actionsDiv = document.createElement("div");
-      actionsDiv.className = "card-actions";
+      <button class="action-btn" onclick="updateDriver(${vehicle.id})">Update Driver</button>
+      <button class="action-btn" onclick="toggleAvailability(${vehicle.id})">Change Availability</button>
+      <button class="action-btn delete-btn" onclick="deleteVehicle(${vehicle.id})">Delete Vehicle</button>
+    `;
 
-      const updateDriverBtn = document.createElement("button");
-      updateDriverBtn.textContent = "Update Driver";
-      updateDriverBtn.className = "btn small-btn";
-
-      const toggleAvailabilityBtn = document.createElement("button");
-      toggleAvailabilityBtn.textContent = "Change Availability";
-      toggleAvailabilityBtn.className = "btn small-btn";
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete Vehicle";
-      deleteBtn.className = "btn small-btn danger-btn";
-
-      actionsDiv.appendChild(updateDriverBtn);
-      actionsDiv.appendChild(toggleAvailabilityBtn);
-      actionsDiv.appendChild(deleteBtn);
-
-      card.appendChild(infoDiv);
-      card.appendChild(actionsDiv);
+    fleetCardsContainer.appendChild(card);
+  });
+}
 
 
-      updateDriverBtn.addEventListener("click", function () {
-        const newName = prompt("Enter new driver name:", vehicle.driverName);
-
-      
-        if (newName === null) return;
-
-        const trimmed = newName.trim();
-        if (trimmed.length === 0) {
-          alert("Driver name cannot be empty");
-          return;
-        }
-
-        vehicle.driverName = trimmed;
-        applyFilters();
-      });
-
-  
-      toggleAvailabilityBtn.addEventListener("click", function () {
-        vehicle.isAvailable = !vehicle.isAvailable;
-        applyFilters();
-      });
 
 
-      deleteBtn.addEventListener("click", function () {
-        const ok = confirm(
-          "Are you sure you want to delete this vehicle?"
-        );
-        if (!ok) return;
+window.updateDriver = function (id) {
+  const vehicle = vehicles.find(v => v.id === id);
+  if (!vehicle) return;
 
-        vehicles = vehicles.filter((v) => v.id !== vehicle.id);
-        applyFilters();
-      });
-
-      fleetCardsContainer.appendChild(card);
-    });
+  const newName = prompt("Enter new driver name:", vehicle.driverName);
+  if (newName === null) return;
+  if (newName.trim() === "") {
+    alert("Driver name cannot be empty");
+    return;
   }
+  vehicle.driverName = newName.trim();
+  applyFilters();
+};
+
+window.toggleAvailability = function (id) {
+  const vehicle = vehicles.find(v => v.id === id);
+  if (!vehicle) return;
+  vehicle.isAvailable = !vehicle.isAvailable;
+  applyFilters();
+};
+
+window.deleteVehicle = function (id) {
+  if (!confirm("Are you sure you want to delete this vehicle?")) return;
+  vehicles = vehicles.filter(v => v.id !== id);
+  applyFilters();
+};
+
 
   
   fleetForm.addEventListener("submit", function (event) {
